@@ -1,6 +1,5 @@
 import java.util.*;
 public class Poker{
-
     public static void darCartasJogadores(Baralho baralho, Jogador[] jogadores, int cartasPorJogador){
         for(int i=0; i < cartasPorJogador; i++){
             for(Jogador jogador : jogadores){
@@ -57,6 +56,27 @@ public class Poker{
         cartaPen[0].display();
     }
 
+    public static void menuJogador(Jogador jogador){
+        Scanner scan = new Scanner(System.in);
+        int selec;
+        System.out.println("O que deseja fazer ?");
+        System.out.println("[1] Mostrar as cartas");
+        System.out.println("[2] Passar para o Proximo");
+        System.out.println("[0] Desistir");
+        selec = scan.nextInt();
+        scan.nextLine();
+        switch(selec){
+            case 1:
+                jogador.mostrarMao();
+                break;
+            case 2:
+                break;
+            default:
+                System.out.println("OPÇAO INVALIDA");
+                break;
+        }
+        scan.close();
+    }
 
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
@@ -86,10 +106,6 @@ public class Poker{
         darUltimaCarta(baralho, ultCarta);
         mostrarUltimaCarta(ultCarta);
     
-        for(Jogador jogador : jogadores){
-            jogador.mostrarMao();
-        }
-
         scan.close();
     }
 }
