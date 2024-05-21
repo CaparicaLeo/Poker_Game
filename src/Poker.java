@@ -55,6 +55,20 @@ public class Poker{
     public static void mostrarUltimaCarta(Carta[] cartaUlt){
         cartaUlt[0].display();
     }
+    public static int valorCarta(String num){
+        switch (num) {
+            case "A":
+                return 14;
+            case "K":
+                return 13;
+            case "Q":
+                return 12;
+            case "J":
+                return 11;
+            default:
+                return Integer.parseInt(num);
+        }
+    }
 
     public static boolean pares(Jogador jogador, Carta[] flop){
         List<Carta> mao = jogador.getMao();
@@ -74,6 +88,61 @@ public class Poker{
         }
         return false;
     }
+    public static boolean doisPares(Jogador jogador, Carta[] flop) {
+        List<Carta> mao = new ArrayList<>(jogador.getMao());
+        mao.addAll(Arrays.asList(flop));
+
+        int[] occurrences = new int[15]; // Índices de 2 a 14 para representar cartas de 2 a A
+        for (Carta carta : mao) {
+            int num = valorCarta(carta.getNum());
+            occurrences[num]++;
+        }
+
+        int pairCount = 0;
+        for (int count : occurrences) {
+            if (count >= 2) {
+            pairCount++;
+            }
+        }
+
+        return pairCount >= 2;
+    }
+    public static boolean trinca(Jogador jogador, Carta[] flop) {
+        List<Carta> mao = new ArrayList<>(jogador.getMao());
+        mao.addAll(Arrays.asList(flop));
+    
+        int[] occurrences = new int[15]; // Índices de 2 a 14 para representar cartas de 2 a A
+        for (Carta carta : mao) {
+            int num = valorCarta(carta.getNum());
+            occurrences[num]++;
+        }
+    
+        for (int count : occurrences) {
+            if (count >= 3) {
+                return true;
+            }
+        }
+    
+        return false;
+    }
+    public static boolean quadra(Jogador jogador, Carta[] flop) {
+        List<Carta> mao = new ArrayList<>(jogador.getMao());
+        mao.addAll(Arrays.asList(flop));
+    
+        int[] occurrences = new int[15]; // Índices de 2 a 14 para representar cartas de 2 a A
+        for (Carta carta : mao) {
+            int num = valorCarta(carta.getNum());
+            occurrences[num]++;
+        }
+    
+        for (int count : occurrences) {
+            if (count == 4) {
+                return true;
+            }
+        }
+    
+        return false;
+    }
 
     public static int comparaMao(Jogador jogador, Carta[] cartasComu, Carta[] cartaPen, Carta[] cartaUlt){
         int forca = 0;
@@ -84,7 +153,13 @@ public class Poker{
         flop[3]=cartaPen[0];
         flop[4]=cartaUlt[0];
 
-        if(pares(jogador,flop)){
+        if(trinca(jogador, flop)){
+            forca = 3;
+        }
+        else if(doisPares(jogador, flop)){
+            forca = 2;
+        }
+        else if(pares(jogador,flop)){
             forca = 1;
         }
         return forca;
@@ -141,18 +216,30 @@ public class Poker{
         for(Jogador jogador : jogadores){
             jogador.mostrarMao();
         }
-        if(comparaMao(jogadores[0], cartasFlop, penCarta, ultCarta) >
-        comparaMao(jogadores[1], cartasFlop, penCarta, ultCarta)){
-            System.out.println(jogadores[0].getNome() + "GANHOU!!!");
+        
+        int[] comparacoes = new int[numJogadores];
+
+        for(int i=0; i< numJogadores;i++){
+            comparacoes[i]= comparaMao(jogadores[i], cartasFlop, penCarta, ultCarta);
         }
-        if(comparaMao(jogadores[0], cartasFlop, penCarta, ultCarta) <
-        comparaMao(jogadores[1], cartasFlop, penCarta, ultCarta)){
-            System.out.println(jogadores[1].getNome() + "GANHOU!!!");
+        for(int i=0; i<numJogadores; i++){
+            for(int j=0;j<numJogadores-1;j++){
+                if(comparacoes[j]<comparacoes[j+1]){
+                    int temp = comparacoes[j];
+                    comparacoes[j] = comparacoes[j+1];
+                    comparacoes[j+1] = temp;
+                }
+            }
         }
-        if(comparaMao(jogadores[0], cartasFlop, penCarta, ultCarta) ==
-        comparaMao(jogadores[1], cartasFlop, penCarta, ultCarta)){
-            System.out.println("EMPATE");
+        if (comparacoes[0] == comparacoes[1]) {
+            System.out.println("EMPATE entre:");
+            for (int i = 0; i < numJogadores && comparacoes[i] == comparacoes[0]; i++) {
+                System.out.println(jogadores[i].getNome());
+            }
+        } else {
+            System.out.println(jogadores[comparacoes[0]].getNome() + " GANHOU!!!");
         }
+
         scan.close();
     }
 }
