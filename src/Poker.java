@@ -35,9 +35,9 @@ public class Poker{
             return;
         }
     }
-    public static void darUltimaCarta(Baralho baralho, Carta[] cartaPen){
+    public static void darUltimaCarta(Baralho baralho, Carta[] cartaUlt){
         if(!baralho.isEmpty()){
-            cartaPen[0]=baralho.puxaCarta();
+            cartaUlt[0]=baralho.puxaCarta();
         }
         else{
             System.out.println("Pilha esta vazia");
@@ -52,17 +52,49 @@ public class Poker{
     public static void mostrarPenCarta(Carta[] cartaPen){
         cartaPen[0].display();
     }
-    public static void mostrarUltimaCarta(Carta[] cartaPen){
-        cartaPen[0].display();
+    public static void mostrarUltimaCarta(Carta[] cartaUlt){
+        cartaUlt[0].display();
     }
 
+    public static boolean pares(Jogador jogador, Carta[] flop){
+        List<Carta> mao = jogador.getMao();
+        Carta[] cartaMao = new Carta[2];
+        for(int i=0;i<2;i++){
+            cartaMao[i] = mao.get(i);
+        }
+        if(cartaMao[0].getNum() == cartaMao[1].getNum()){
+            return true;
+        }
+        for(int i=0;i<2;i++){
+            for(int j=0;j<5;j++){
+                if(cartaMao[i].getNum() == flop[j].getNum()){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static int comparaMao(Jogador jogador, Carta[] cartasComu, Carta[] cartaPen, Carta[] cartaUlt){
+        int forca = 0;
+        Carta[] flop = new Carta[5];
+        for(int i=0;i<3;i++){
+            flop[i] = cartasComu[i];
+        }
+        flop[3]=cartaPen[0];
+        flop[4]=cartaUlt[0];
+
+        if(pares(jogador,flop)){
+            forca = 1;
+        }
+        return forca;
+    }
     public static void menuJogador(Jogador jogador){
         Scanner scan = new Scanner(System.in);
         int selec;
         System.out.println("O que deseja fazer ?");
         System.out.println("[1] Mostrar as cartas");
         System.out.println("[2] Passar para o Proximo");
-        System.out.println("[0] Desistir");
         selec = scan.nextInt();
         scan.nextLine();
         switch(selec){
@@ -105,7 +137,23 @@ public class Poker{
         mostrarPenCarta(penCarta);
         darUltimaCarta(baralho, ultCarta);
         mostrarUltimaCarta(ultCarta);
-    
+
+        for(Jogador jogador : jogadores){
+            jogador.mostrarMao();
+        }
+        if(comparaMao(jogadores[0], cartasFlop, penCarta, ultCarta) >
+        comparaMao(jogadores[1], cartasFlop, penCarta, ultCarta)){
+            System.out.println(jogadores[0].getNome() + "GANHOU!!!");
+        }
+        if(comparaMao(jogadores[0], cartasFlop, penCarta, ultCarta) <
+        comparaMao(jogadores[1], cartasFlop, penCarta, ultCarta)){
+            System.out.println(jogadores[1].getNome() + "GANHOU!!!");
+        }
+        if(comparaMao(jogadores[0], cartasFlop, penCarta, ultCarta) ==
+        comparaMao(jogadores[1], cartasFlop, penCarta, ultCarta)){
+            System.out.println("EMPATE");
+        }
         scan.close();
     }
 }
+
