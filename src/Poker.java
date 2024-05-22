@@ -175,7 +175,10 @@ public class Poker{
         flop[3]=cartaPen[0];
         flop[4]=cartaUlt[0];
 
-        if(trinca(jogador, flop)){
+        if(quadra(jogador, flop)){
+            forca = 4;
+        }
+        else if(trinca(jogador, flop)){
             forca = 3;
         }
         else if(doisPares(jogador, flop)){
@@ -260,22 +263,21 @@ public class Poker{
             menuJogador(jogadores[i], valorMesa);
         }
         
+        darPenultimaCarta(baralho, penCarta);
         for(int i=0;i<jogadores.length;i++){
             limparTerminal();
             System.out.println("Cartas FLOP-------------------");
             mostrarCartasFlop(cartasFlop);
-            darPenultimaCarta(baralho, penCarta);
             mostrarPenCarta(penCarta);
             menuJogador(jogadores[i], valorMesa);
         }
         
+        darUltimaCarta(baralho, ultCarta);
         for(int i=0;i<jogadores.length;i++){
             limparTerminal();
             System.out.println("Cartas FLOP-------------------");
             mostrarCartasFlop(cartasFlop);
-            darPenultimaCarta(baralho, penCarta);
             mostrarPenCarta(penCarta);
-            darUltimaCarta(baralho, ultCarta);
             mostrarUltimaCarta(ultCarta);
             menuJogador(jogadores[i], valorMesa);
         }
