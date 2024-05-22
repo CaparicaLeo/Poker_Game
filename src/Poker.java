@@ -1,5 +1,11 @@
 import java.util.*;
+import java.io.PrintStream;
+
 public class Poker{
+    public static void limparTerminal() {
+        PrintStream printStream = new PrintStream(System.out);
+        printStream.println("\u001b[H\u001b[2J");
+    }
     public static void darCartasJogadores(Baralho baralho, Jogador[] jogadores, int cartasPorJogador){
         for(int i=0; i < cartasPorJogador; i++){
             for(Jogador jogador : jogadores){
@@ -144,6 +150,22 @@ public class Poker{
         return false;
     }
 
+    /*public static boolean continuar(Jogador[] jogadores){
+        for(int i=0;i<jogadores.length;i++){
+            if(!jogadores[i].getContinua()){
+                return false;
+            }
+        }
+        return true;
+    }
+    public static boolean verificaAposta(int valorMesa, Jogador[] jogadores){
+        for(int i=0; i<jogadores.length; i++){
+            if(jogadores[i].getAposta()!=valorMesa){
+                return false;
+            }
+        }
+        return true;
+    }*/
     public static int comparaMao(Jogador jogador, Carta[] cartasComu, Carta[] cartaPen, Carta[] cartaUlt){
         int forca = 0;
         Carta[] flop = new Carta[5];
@@ -164,12 +186,17 @@ public class Poker{
         }
         return forca;
     }
-    public static void menuJogador(Jogador jogador){
+    public static void menuJogador(Jogador jogador, int valorMesa){
+        @SuppressWarnings("resource")
         Scanner scan = new Scanner(System.in);
+        //int aposta;
         int selec;
-        System.out.println("O que deseja fazer ?");
+        do{
+        System.out.println("O que deseja fazer " + jogador.getNome() + " ?");
         System.out.println("[1] Mostrar as cartas");
         System.out.println("[2] Passar para o Proximo");
+        //System.out.println("[3] Apostar");
+
         selec = scan.nextInt();
         scan.nextLine();
         switch(selec){
@@ -177,12 +204,24 @@ public class Poker{
                 jogador.mostrarMao();
                 break;
             case 2:
+                jogador.setContinua(true);
                 break;
+            /*case 3:
+                do{
+                    System.out.print("Quanto apostar");
+                    aposta = scan.nextInt();
+                    scan.nextLine();
+                    if(aposta>=valorMesa){
+                        System.out.println("Valor minimo não preenchido");
+                    }
+                }while(aposta>=valorMesa);
+                break;*/
+    
             default:
                 System.out.println("OPÇAO INVALIDA");
                 break;
-        }
-        scan.close();
+            }
+        }while(selec!=2);
     }
 
     public static void main(String[] args) {
@@ -196,22 +235,50 @@ public class Poker{
         for(int i=0;i<numJogadores;i++){
             System.out.print("Digite o nome do Jogador " + (i+1) + ": ");
             String nomeJogador = scan.nextLine();
-            jogadores[i] = new Jogador(nomeJogador);
+            jogadores[i] = new Jogador(nomeJogador, 10);
         }
 
         Baralho baralho = new Baralho();
+        int valorMesa=0;
         darCartasJogadores(baralho, jogadores, 2);
-
+        
+        for(int i=0;i<jogadores.length;i++){
+            limparTerminal();
+            menuJogador(jogadores[i], valorMesa);
+        }
+        
+        
         Carta[] cartasFlop = new Carta[3];
         Carta[] penCarta = new Carta[1];
         Carta[] ultCarta = new Carta[1];
         darCartasFlop(baralho, cartasFlop, cartasFlop.length);
-        System.out.println("Cartas FLOP-------------------");
-        mostrarCartasFlop(cartasFlop);
-        darPenultimaCarta(baralho, penCarta);
-        mostrarPenCarta(penCarta);
-        darUltimaCarta(baralho, ultCarta);
-        mostrarUltimaCarta(ultCarta);
+        
+        for(int i=0;i<jogadores.length;i++){
+            limparTerminal();
+            System.out.println("Cartas FLOP-------------------");
+            mostrarCartasFlop(cartasFlop);
+            menuJogador(jogadores[i], valorMesa);
+        }
+        
+        for(int i=0;i<jogadores.length;i++){
+            limparTerminal();
+            System.out.println("Cartas FLOP-------------------");
+            mostrarCartasFlop(cartasFlop);
+            darPenultimaCarta(baralho, penCarta);
+            mostrarPenCarta(penCarta);
+            menuJogador(jogadores[i], valorMesa);
+        }
+        
+        for(int i=0;i<jogadores.length;i++){
+            limparTerminal();
+            System.out.println("Cartas FLOP-------------------");
+            mostrarCartasFlop(cartasFlop);
+            darPenultimaCarta(baralho, penCarta);
+            mostrarPenCarta(penCarta);
+            darUltimaCarta(baralho, ultCarta);
+            mostrarUltimaCarta(ultCarta);
+            menuJogador(jogadores[i], valorMesa);
+        }
 
         for(Jogador jogador : jogadores){
             jogador.mostrarMao();
