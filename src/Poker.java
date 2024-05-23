@@ -1,5 +1,6 @@
 import java.util.*;
 import java.io.PrintStream;
+import java.lang.Thread;
 
 public class Poker{
     public static void limparTerminal() {
@@ -73,6 +74,20 @@ public class Poker{
                 return 11;
             default:
                 return Integer.parseInt(num);
+        }
+    }
+    public static int valorNaipe(String naipe){
+        switch (naipe) {
+            case "Ouros":
+                return 1;
+            case "Espadas":
+                return 2;
+            case "Copas":
+                return 3;
+            case "Paus":
+                return 4;
+            default:
+                return 0;
         }
     }
 
@@ -149,23 +164,22 @@ public class Poker{
     
         return false;
     }
+    public static Carta maiorCarta(Jogador jogador){
+        Carta[] mao = new Carta[2];
+        Carta maiorCarta = new Carta();
+        mao[0]=jogador.getMao().get(0);
+        mao[1]=jogador.getMao().get(1);
 
-    /*public static boolean continuar(Jogador[] jogadores){
-        for(int i=0;i<jogadores.length;i++){
-            if(!jogadores[i].getContinua()){
-                return false;
-            }
+        if(valorCarta(mao[0].getNum()) > valorCarta(mao[1].getNum())){
+            maiorCarta = mao[0];
         }
-        return true;
+        else if(valorCarta(mao[0].getNum()) < valorCarta(mao[1].getNum())){
+            maiorCarta = mao[1];
+        }
+        return maiorCarta;
+
     }
-    public static boolean verificaAposta(int valorMesa, Jogador[] jogadores){
-        for(int i=0; i<jogadores.length; i++){
-            if(jogadores[i].getAposta()!=valorMesa){
-                return false;
-            }
-        }
-        return true;
-    }*/
+
     public static int comparaMao(Jogador jogador, Carta[] cartasComu, Carta[] cartaPen, Carta[] cartaUlt){
         int forca = 0;
         Carta[] flop = new Carta[5];
@@ -176,15 +190,18 @@ public class Poker{
         flop[4]=cartaUlt[0];
 
         if(quadra(jogador, flop)){
-            forca = 4;
+            forca = 5;
         }
         else if(trinca(jogador, flop)){
-            forca = 3;
+            forca = 4;
         }
         else if(doisPares(jogador, flop)){
-            forca = 2;
+            forca = 3;
         }
         else if(pares(jogador,flop)){
+            forca = 2;
+        }
+        else{
             forca = 1;
         }
         return forca;
@@ -198,7 +215,6 @@ public class Poker{
         System.out.println("O que deseja fazer " + jogador.getNome() + " ?");
         System.out.println("[1] Mostrar as cartas");
         System.out.println("[2] Passar para o Proximo");
-        //System.out.println("[3] Apostar");
 
         selec = scan.nextInt();
         scan.nextLine();
@@ -209,17 +225,6 @@ public class Poker{
             case 2:
                 jogador.setContinua(true);
                 break;
-            /*case 3:
-                do{
-                    System.out.print("Quanto apostar");
-                    aposta = scan.nextInt();
-                    scan.nextLine();
-                    if(aposta>=valorMesa){
-                        System.out.println("Valor minimo não preenchido");
-                    }
-                }while(aposta>=valorMesa);
-                break;*/
-    
             default:
                 System.out.println("OPÇAO INVALIDA");
                 break;
@@ -227,7 +232,7 @@ public class Poker{
         }while(selec!=2);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         Scanner scan = new Scanner(System.in);
 
         System.out.print("Selecione a quantidade de Jogadores: ");
@@ -286,30 +291,62 @@ public class Poker{
             jogador.mostrarMao();
         }
         
-        int[] comparacoes = new int[numJogadores];
+        JogadorComparacao[] jogadorComparacoes = new JogadorComparacao[numJogadores];
 
-        for(int i=0; i< numJogadores;i++){
-            comparacoes[i]= comparaMao(jogadores[i], cartasFlop, penCarta, ultCarta);
+        for (int i = 0; i < numJogadores; i++) {
+            int comparacao = comparaMao(jogadores[i], cartasFlop, penCarta, ultCarta);
+            jogadorComparacoes[i] = new JogadorComparacao(jogadores[i], comparacao);
         }
-        for(int i=0; i<numJogadores; i++){
-            for(int j=0;j<numJogadores-1;j++){
-                if(comparacoes[j]<comparacoes[j+1]){
-                    int temp = comparacoes[j];
-                    comparacoes[j] = comparacoes[j+1];
-                    comparacoes[j+1] = temp;
+
+        // Encontra o jogador com a maior força de mão
+        int maiorForca = -1;
+        for (JogadorComparacao jc : jogadorComparacoes) {
+            if (jc.comparacao > maiorForca) {
+                maiorForca = jc.comparacao;
+            }
+        }
+
+        // Identifica jogadores empatados com a maior força de mão
+        List<JogadorComparacao> jogadoresEmpatados = new ArrayList<>();
+        for (JogadorComparacao jc : jogadorComparacoes) {
+            if (jc.comparacao == maiorForca) {
+                jogadoresEmpatados.add(jc);
+            }
+        }
+
+        if (jogadoresEmpatados.size() > 1) {
+            // Desempate pela maior carta
+            Jogador vencedor = jogadoresEmpatados.get(0).jogador;
+            Carta maiorCartaVencedor = maiorCarta(vencedor);
+
+            boolean empate = false;
+            for (int i = 1; i < jogadoresEmpatados.size(); i++) {
+                Jogador jogadorAtual = jogadoresEmpatados.get(i).jogador;
+                Carta maiorCartaAtual = maiorCarta(jogadorAtual);
+
+                if (valorCarta(maiorCartaAtual.getNum()) > valorCarta(maiorCartaVencedor.getNum())) {
+                    vencedor = jogadorAtual;
+                    maiorCartaVencedor = maiorCartaAtual;
+                    empate = false;
+                } else if (valorCarta(maiorCartaAtual.getNum()) == valorCarta(maiorCartaVencedor.getNum())) {
+                    empate = true;
                 }
             }
-        }
-        if (comparacoes[0] == comparacoes[1]) {
-            System.out.println("EMPATE entre:");
-            for (int i = 0; i < numJogadores && comparacoes[i] == comparacoes[0]; i++) {
-                System.out.println(jogadores[i].getNome());
+
+            if (empate) {
+                System.out.println("EMPATE entre:");
+                for (JogadorComparacao jc : jogadoresEmpatados) {
+                    System.out.println(jc.jogador.getNome());
+                }
+            } else {
+                System.out.println(vencedor.getNome() + " GANHOU!!!");
             }
         } else {
-            System.out.println(jogadores[comparacoes[0]].getNome() + " GANHOU!!!");
+            System.out.println(jogadoresEmpatados.get(0).jogador.getNome() + " GANHOU!!!");
         }
 
         scan.close();
+        Thread.sleep(100000);
     }
 }
 
