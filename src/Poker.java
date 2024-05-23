@@ -257,7 +257,6 @@ public class Poker{
                 jogador.mostrarMao();
                 break;
             case 2:
-                jogador.setContinua(true);
                 break;
             default:
                 System.out.println("OPÇAO INVALIDA");
