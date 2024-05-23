@@ -90,6 +90,34 @@ public class Poker{
                 return 0;
         }
     }
+    public static boolean fullHouse(Jogador jogador, Carta[] flop){
+        return pares(jogador,flop) && trinca(jogador, flop);
+    }
+    public static boolean flush(Jogador jogador, Carta[] flop){
+        int contO=0, contE=0, contC=0, contP=0;
+        List<Carta> mao = jogador.getMao();
+        for(Carta c : flop){
+            mao.add(c);
+        }
+        for(Carta c: mao){
+            String naipe = c.getNaipe();
+            switch(naipe){
+                case "Ouros":
+                    contC++;
+                    break;
+                case "Espadas":
+                    contE++;
+                    break;
+                case "Copas":
+                    contC++;
+                    break;
+                case "Paus":
+                    contP++;
+                    break;
+            }
+        }
+        return contO >= 5 || contE >= 5 || contC >= 5 || contP >= 5;
+    }
 
     public static boolean pares(Jogador jogador, Carta[] flop){
         List<Carta> mao = jogador.getMao();
@@ -190,6 +218,12 @@ public class Poker{
         flop[4]=cartaUlt[0];
 
         if(quadra(jogador, flop)){
+            forca = 7;
+        }
+        else if(fullHouse(jogador, flop)){
+            forca = 6;
+        }
+        else if(flush(jogador, flop)){
             forca = 5;
         }
         else if(trinca(jogador, flop)){
@@ -287,7 +321,12 @@ public class Poker{
             menuJogador(jogadores[i], valorMesa);
         }
 
+        limparTerminal();
         for(Jogador jogador : jogadores){
+            System.out.println("Cartas FLOP-------------------");
+            mostrarCartasFlop(cartasFlop);
+            mostrarPenCarta(penCarta);
+            mostrarUltimaCarta(ultCarta);
             jogador.mostrarMao();
         }
         
